@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple-Style Study Timer</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #f5f5f7, #eaeaea);
+      color: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      transition: background 0.5s, color 0.5s;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      font-weight: 600;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #circle {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 30px;
+      background: conic-gradient(#0071e3 0deg, transparent 0deg);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+      transition: background 0.5s;
+    }
+
+    #timer {
+      animation: fadeScale 0.5s forwards;
+    }
+
+    @keyframes fadeScale {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    button {
+      background: #0071e3;
+      color: #fff;
+      border: none;
+      padding: 14px 30px;
+      font-size: 1.1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+      background: #005bb5;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 14px;
+      color: #777;
+    }
+
+    /* Top-right time selector */
+    .time-selector {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      display: flex;
+      overflow: hidden;
+    }
+
+    .time-selector button {
+      background: none;
+      color: #0071e3;
+      padding: 8px 15px;
+      border-radius: 0;
+      font-weight: 500;
+      box-shadow: none;
+      border-right: 1px solid #eee;
+    }
+
+    .time-selector button:last-child { border-right: none; }
+
+    .time-selector button.active {
+      background: #0071e3;
+      color: #fff;
+    }
+
+    @media (max-width: 500px) {
+      #circle { width: 200px; height: 200px; font-size: 2.5rem; }
+      button { padding: 12px 25px; font-size: 1rem; }
+      .time-selector button { padding: 6px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Study Timer</h1>
+
+  <!-- Top-right time selector -->
+  <div class="time-selector">
+    <button onclick="setTimer(15, this)" id="time15">15</button>
+    <button onclick="setTimer(25, this)" id="time25" class="active">25</button>
+    <button onclick="setTimer(50, this)" id="time50">50</button>
+  </div>
+
+  <div id="circle"><div id="timer">25:00</div></div>
+
+  <div class="buttons">
+    <button onclick="startTimer()">Start</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resetTimer()">Reset</button>
+  </div>
+
+  <footer>Focus mode · Stay productive ✨</footer>
+
+  <script>
+    let totalTime = 25 * 60;
+    let time = totalTime;
+    let timerInterval;
+    let isRunning = false;
+
+    const timerEl = document.getElementById("timer");
+    const circleEl = document.getElementById("circle");
+
+    function updateTimerDisplay() {
+      let minutes = Math.floor(time / 60);
+      let seconds = time % 60;
+      timerEl.textContent = `${minutes}:${seconds.toString().padStart(2,'0')}`;
+      let progress = (1 - time / totalTime) * 360;
+      circleEl.style.background = `conic-gradient(#0071e3 ${progress}deg, transparent ${progress}deg)`;
+    }
+
+    function startTimer() {
+      if (!isRunning) {
+        isRunning = true;
+        timerInterval = setInterval(() => {
+          if (time > 0) { time--; updateTimerDisplay(); }
+          else { clearInterval(timerInterval); isRunning = false; alert("Time’s up! Take a break 🕒"); }
+        }, 1000);
+      }
+    }
+
+    function pauseTimer() { clearInterval(timerInterval); isRunning = false; }
+
+    function resetTimer() { clearInterval(timerInterval); time = totalTime; updateTimerDisplay(); isRunning = false; }
+
+    function setTimer(minutes, button) {
+      // Remove active from all buttons
+      document.querySelectorAll('.time-selector button').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+
+      totalTime = minutes * 60;
+      time = totalTime;
+      updateTimerDisplay();
+      clearInterval(timerInterval);
+      isRunning = false;
+    }
+
+    updateTimerDisplay();
+  </script>
+</body>
+</html>
